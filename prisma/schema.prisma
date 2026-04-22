@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firebaseUid   String         @unique @map("firebase_uid")
+  email         String         @unique
+  hasAllergies  Boolean?         
+  displayName   String?        @map("display_name")
+  avatarUrl     String?        @map("avatar_url")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  userAllergens UserAllergen[]
+
+  @@map("users")
+}
+
+model Allergen {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String         @unique
+  category      String
+  commonNames   String[]       @map("common_names")
+  userAllergens UserAllergen[]
+
+  @@map("allergens")
+}
+
+model UserAllergen {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  allergenId String   @map("allergen_id") @db.Uuid
+  allergen   Allergen @relation(fields: [allergenId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, allergenId])
+  @@map("user_allergens")
+}

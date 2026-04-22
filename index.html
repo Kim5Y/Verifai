@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NAFDAC Auth Test</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e0f11;
+        --surface: #16181c;
+        --border: #2a2d35;
+        --text: #e8eaf0;
+        --muted: #6b7280;
+        --green: #22c55e;
+        --green-dim: #14532d;
+        --red: #ef4444;
+        --red-dim: #450a0a;
+        --blue: #3b82f6;
+        --blue-dim: #1e3a5f;
+        --yellow: #f59e0b;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Sora', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .shell {
+        width: 100%;
+        max-width: 520px;
+      }
+      .header {
+        margin-bottom: 2rem;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #1a1f2e;
+        border: 1px solid #2a3050;
+        color: var(--blue);
+        font-size: 11px;
+        font-family: 'DM Mono', monospace;
+        padding: 4px 10px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+        letter-spacing: 0.05em;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--blue);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.3;
+      }
+      h1 span {
+        color: var(--green);
+      }
+      .sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* config warning */
+      .config-warn {
+        background: #1c1700;
+        border: 1px solid #3d2e00;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 12px;
+        font-family: 'DM Mono', monospace;
+        color: var(--yellow);
+        margin-bottom: 1.5rem;
+        display: none;
+      }
+      .config-warn.show {
+        display: block;
+      }
+
+      /* card */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      .card-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        font-size: 11px;
+        font-family: 'DM Mono', monospace;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-head .step {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 20px;
+      }
+      .card-body {
+        padding: 18px;
+      }
+
+      /* google btn */
+      .google-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 11px 18px;
+        background: #fff;
+        color: #1f2937;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Sora', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .google-btn:hover {
+        opacity: 0.9;
+      }
+      .google-btn:active {
+        opacity: 0.8;
+        transform: scale(0.99);
+      }
+      .google-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .google-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      /* input */
+      .input-group {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        font-size: 11px;
+        font-family: 'DM Mono', monospace;
+        color: var(--muted);
+        margin-bottom: 6px;
+        letter-spacing: 0.05em;
+      }
+      input[type='text'] {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 13px;
+        font-family: 'DM Mono', monospace;
+        color: var(--text);
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input[type='text']:focus {
+        border-color: #4a5568;
+      }
+      input[type='text']::placeholder {
+        color: var(--muted);
+      }
+
+      /* action btn */
+      .action-btn {
+        width: 100%;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: 'Sora', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .action-btn:hover {
+        background: #1e2128;
+      }
+      .action-btn:active {
+        transform: scale(0.99);
+      }
+      .action-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .action-btn.primary {
+        background: var(--green-dim);
+        border-color: #166534;
+        color: var(--green);
+      }
+      .action-btn.primary:hover {
+        background: #166534;
+      }
+      .action-btn.danger {
+        background: var(--red-dim);
+        border-color: #7f1d1d;
+        color: var(--red);
+      }
+      .action-btn.danger:hover {
+        background: #7f1d1d;
+      }
+
+      /* response box */
+      .res-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        font-family: 'DM Mono', monospace;
+        font-size: 11px;
+        color: var(--muted);
+        min-height: 60px;
+        margin-top: 12px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        line-height: 1.6;
+        transition: border-color 0.2s;
+      }
+      .res-box.success {
+        border-color: #166534;
+        color: var(--green);
+      }
+      .res-box.error {
+        border-color: #7f1d1d;
+        color: var(--red);
+      }
+      .res-box.info {
+        border-color: #1e3a5f;
+        color: #93c5fd;
+      }
+
+      /* user pill */
+      .user-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--green-dim);
+        border: 1px solid #166534;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--green);
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .user-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .user-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .user-email {
+        font-size: 11px;
+        color: var(--muted);
+        font-family: 'DM Mono', monospace;
+      }
+      .user-uid {
+        font-size: 10px;
+        color: #4a5568;
+        font-family: 'DM Mono', monospace;
+        margin-top: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* token box */
+      .token-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: 'DM Mono', monospace;
+        font-size: 10px;
+        color: #4a5568;
+        word-break: break-all;
+        line-height: 1.6;
+        margin-bottom: 12px;
+        max-height: 80px;
+        overflow-y: auto;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .token-box:hover {
+        border-color: #4a5568;
+        color: var(--muted);
+      }
+      .token-label {
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 4px;
+        font-family: 'DM Mono', monospace;
+      }
+
+      /* allergens input */
+      .allergen-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .allergen-row input {
+        flex: 1;
+      }
+      .add-btn {
+        padding: 9px 14px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .add-btn:hover {
+        background: #1e2128;
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+        min-height: 28px;
+      }
+      .tag {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #1a1f2e;
+        border: 1px solid #2a3050;
+        color: #93c5fd;
+        font-size: 11px;
+        font-family: 'DM Mono', monospace;
+        padding: 3px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+      .tag:hover {
+        background: #1e3a5f;
+      }
+      .tag .x {
+        color: #4a5568;
+        font-size: 10px;
+      }
+
+      /* divider */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 14px 0;
+      }
+
+      /* status bar */
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-family: 'DM Mono', monospace;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--muted);
+      }
+      .status-dot.green {
+        background: var(--green);
+        box-shadow: 0 0 6px var(--green);
+      }
+      .status-dot.red {
+        background: var(--red);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #2a2d35;
+        border-top-color: var(--muted);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="header">
+        <div class="badge"><span class="dot"></span> AUTH TEST HARNESS</div>
+        <h1>Firebase <span>Google OAuth</span></h1>
+        <p class="sub">Test your NestJS auth flow end-to-end</p>
+      </div>
+
+      <div class="config-warn show" id="configWarn">
+        ⚠ Replace FIREBASE_CONFIG and API_URL in the &lt;script&gt; tag before
+        using
+      </div>
+
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Not signed in</span>
+      </div>
+
+      <!-- STEP 1: SIGN IN -->
+      <div class="card" id="signinCard">
+        <div class="card-head">
+          STEP 1 — GOOGLE SIGNIN
+          <span class="step">firebase</span>
+        </div>
+        <div class="card-body">
+          <button class="google-btn" id="signinBtn" onclick="handleSignin()">
+            <svg class="google-icon" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            Sign in with Google
+          </button>
+          <div class="res-box" id="signinRes">Waiting for signin...</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: USER INFO + TOKEN -->
+      <div class="card hidden" id="userCard">
+        <div class="card-head">
+          STEP 2 — FIREBASE USER
+          <span class="step">client-side</span>
+        </div>
+        <div class="card-body">
+          <div class="user-pill" id="userPill">
+            <div class="avatar" id="avatarEl"></div>
+            <div class="user-info">
+              <div class="user-name" id="userName"></div>
+              <div class="user-email" id="userEmail"></div>
+              <div class="user-uid" id="userUid"></div>
+            </div>
+          </div>
+          <div class="token-label">ID TOKEN (click to copy)</div>
+          <div
+            class="token-box"
+            id="tokenBox"
+            onclick="copyToken()"
+            title="Click to copy"
+          ></div>
+          <button class="action-btn" onclick="refreshToken()">
+            ↻ Refresh token
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: PING BACKEND /users/me -->
+      <div class="card hidden" id="meCard">
+        <div class="card-head">
+          STEP 3 — GET /users/me
+          <span class="step">nestjs</span>
+        </div>
+        <div class="card-body">
+          <button class="action-btn primary" onclick="callMe()">
+            Send request to /users/me
+          </button>
+          <div class="res-box" id="meRes">Press the button to test</div>
+        </div>
+      </div>
+
+      <!-- STEP 4: ONBOARD (if new user) -->
+      <div class="card hidden" id="onboardCard">
+        <div class="card-head">
+          STEP 4 — POST /users/onboard
+          <span class="step">nestjs</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px">
+            Add allergen IDs to send. Use real UUIDs from your allergens table.
+          </p>
+          <div class="allergen-row">
+            <input
+              type="text"
+              id="allergenInput"
+              placeholder="paste allergen UUID..."
+            />
+            <button class="add-btn" onclick="addAllergen()">+ Add</button>
+          </div>
+          <div class="tags" id="tagContainer"></div>
+          <button class="action-btn primary" onclick="callOnboard()">
+            POST /users/onboard
+          </button>
+          <div class="res-box" id="onboardRes">
+            Fill in allergen IDs then submit
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: SIGN OUT -->
+      <div class="card hidden" id="signoutCard">
+        <div class="card-head">
+          STEP 5 — SIGN OUT
+          <span class="step">firebase</span>
+        </div>
+        <div class="card-body">
+          <button class="action-btn danger" onclick="handleSignout()">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      // ============================================================
+      // PASTE YOUR CONFIG HERE
+      // ============================================================
+      const FIREBASE_CONFIG = {
+        apiKey: 'AIzaSyC2mBmZyLHEsWGvqhY3nfAjHzXF3_o2x1w', // MISSING: Get this from Firebase Console > Project Settings
+        authDomain: 'product-validator-3e181.firebaseapp.com',
+        projectId: 'product-validator-3e181',
+        storageBucket: 'product-validator-3e181.appspot.com',
+        messagingSenderId: '106435157309', // Derived from client_id (first part)
+        appId: '1:1027616659164:web:fc74d6eb80f23517f68619', // MISSING: Get this from Firebase Console > Project Settings
+      };
+
+      // Your NestJS backend URL
+      const API_URL = 'http://localhost:8080';
+      // ============================================================
+
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        signOut,
+        onAuthStateChanged,
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+      const app = initializeApp(FIREBASE_CONFIG);
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
+
+      let currentToken = null;
+      let allergenIds = [];
+
+      // check if config is still placeholder
+      if (FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+        document.getElementById('configWarn').classList.add('show');
+      } else {
+        document.getElementById('configWarn').classList.remove('show');
+      }
+
+      // auth state listener
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentToken = await user.getIdToken();
+          console.log({ currentToken });
+          console.log(user);
+          showSignedIn(user);
+        } else {
+          showSignedOut();
+        }
+      });
+
+      function showSignedIn(user) {
+        setStatus(true, `Signed in as ${user.email}`);
+
+        // populate user card
+        const avatarEl = document.getElementById('avatarEl');
+        if (user.photoURL) {
+          avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar" />`;
+        } else {
+          avatarEl.textContent = (user.displayName ||
+            user.email ||
+            '?')[0].toUpperCase();
+        }
+        document.getElementById('userName').textContent =
+          user.displayName || '—';
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userUid').textContent = `uid: ${user.uid}`;
+        document.getElementById('tokenBox').textContent = currentToken;
+
+        // show/hide cards
+        document.getElementById('signinCard').classList.add('hidden');
+        document.getElementById('userCard').classList.remove('hidden');
+        document.getElementById('meCard').classList.remove('hidden');
+        document.getElementById('onboardCard').classList.remove('hidden');
+        document.getElementById('signoutCard').classList.remove('hidden');
+
+        setRes(
+          'signinRes',
+          `✓ Signed in successfully\nuid: ${user.uid}`,
+          'success',
+        );
+      }
+
+      function showSignedOut() {
+        setStatus(false, 'Not signed in');
+        currentToken = null;
+        allergenIds = [];
+
+        document.getElementById('signinCard').classList.remove('hidden');
+        document.getElementById('userCard').classList.add('hidden');
+        document.getElementById('meCard').classList.add('hidden');
+        document.getElementById('onboardCard').classList.add('hidden');
+        document.getElementById('signoutCard').classList.add('hidden');
+
+        setRes('signinRes', 'Waiting for signin...', '');
+        setRes('meRes', 'Press the button to test', '');
+        setRes('onboardRes', 'Fill in allergen IDs then submit', '');
+        renderTags();
+      }
+
+      // google signin
+      window.handleSignin = async () => {
+        const btn = document.getElementById('signinBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Signing in...`;
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (err) {
+          setRes('signinRes', `✗ ${err.message}`, 'error');
+          btn.disabled = false;
+          btn.innerHTML = `<svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Sign in with Google`;
+        }
+      };
+
+      // signout
+      window.handleSignout = async () => {
+        await signOut(auth);
+      };
+
+      // refresh token
+      window.refreshToken = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        currentToken = await user.getIdToken(true);
+        document.getElementById('tokenBox').textContent = currentToken;
+      };
+
+      // copy token
+      window.copyToken = async () => {
+        if (!currentToken) return;
+        await navigator.clipboard.writeText(currentToken);
+        const box = document.getElementById('tokenBox');
+        const orig = box.textContent;
+        box.textContent = '✓ Copied to clipboard!';
+        setTimeout(() => (box.textContent = orig), 1500);
+      };
+
+      // call /users/me
+      window.callMe = async () => {
+        if (!currentToken) return;
+        setRes(
+          'meRes',
+          `<span class="spinner"></span> Calling ${API_URL}/users/me...`,
+          'info',
+        );
+        try {
+          const res = await fetch(`${API_URL}/auth/onboard`, {
+            headers: { Authorization: `Bearer ${currentToken}` },
+            method: 'POST',
+          });
+          console.log(res);
+          const data = await res.json();
+          console.log(data);
+          if (!res.ok) {
+            setRes(
+              'meRes',
+              `✗ ${res.status} ${res.statusText}\n${JSON.stringify(data, null, 2)}`,
+              'error',
+            );
+            return;
+          }
+
+          const status = data.isNewUser
+            ? '⚡ New user — onboarding needed'
+            : '✓ Existing user found';
+          setRes(
+            'meRes',
+            `${status}\n\n${JSON.stringify(data, null, 2)}`,
+            data.isNewUser ? 'info' : 'success',
+          );
+
+          if (!data.isNewUser) {
+            document
+              .getElementById('onboardCard')
+              .querySelector('.card-head').textContent =
+              'STEP 4 — ALREADY ONBOARDED';
+            document
+              .getElementById('onboardCard')
+              .querySelector('.card-body').innerHTML =
+              `<div class="res-box success">✓ User already onboarded. Allergens saved.</div>`;
+          }
+        } catch (err) {
+          setRes(
+            'meRes',
+            `✗ Network error — is your NestJS server running at ${API_URL}?\n\n${err.message}`,
+            'error',
+          );
+        }
+      };
+
+      // allergen tag management
+      window.addAllergen = () => {
+        const input = document.getElementById('allergenInput');
+        const val = input.value.trim();
+        if (!val || allergenIds.includes(val)) return;
+        allergenIds.push(val);
+        input.value = '';
+        renderTags();
+      };
+
+      document.addEventListener('keydown', (e) => {
+        if (
+          e.key === 'Enter' &&
+          document.activeElement?.id === 'allergenInput'
+        ) {
+          window.addAllergen();
+        }
+      });
+
+      window.removeAllergen = (id) => {
+        allergenIds = allergenIds.filter((a) => a !== id);
+        renderTags();
+      };
+
+      function renderTags() {
+        const container = document.getElementById('tagContainer');
+        if (!container) return;
+        container.innerHTML = allergenIds
+          .map(
+            (id) =>
+              `<div class="tag" onclick="removeAllergen('${id}')">
+        ${id.substring(0, 8)}...
+        <span class="x">✕</span>
+      </div>`,
+          )
+          .join('');
+      }
+
+      // call /users/onboard
+      window.callOnboard = async () => {
+        if (!currentToken) return;
+        setRes(
+          'onboardRes',
+          `<span class="spinner"></span> Calling ${API_URL}/users/onboard...`,
+          'info',
+        );
+        try {
+          const res = await fetch(`${API_URL}/users/onboard`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${currentToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ allergenIds }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setRes(
+              'onboardRes',
+              `✗ ${res.status} ${res.statusText}\n${JSON.stringify(data, null, 2)}`,
+              'error',
+            );
+          } else {
+            setRes(
+              'onboardRes',
+              `✓ Onboarding successful!\n\n${JSON.stringify(data, null, 2)}`,
+              'success',
+            );
+          }
+        } catch (err) {
+          setRes(
+            'onboardRes',
+            `✗ Network error — is your NestJS server running at ${API_URL}?\n\n${err.message}`,
+            'error',
+          );
+        }
+      };
+
+      // helpers
+      function setStatus(online, text) {
+        document.getElementById('statusDot').className =
+          `status-dot ${online ? 'green' : 'red'}`;
+        document.getElementById('statusText').textContent = text;
+      }
+
+      function setRes(id, html, type) {
+        const el = document.getElementById(id);
+        el.innerHTML = html;
+        el.className = `res-box ${type}`;
+      }
+    </script>
+  </body>
+</html>
