@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FirebaseUser } from './dto';
+import type { FirebaseUser } from './dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -46,22 +46,3 @@ export class AuthService {
     }
   }
 }
-
-// {
-//   name: 'Kimzy',
-//   picture: 'https://lh3.googleusercontent.com/a/ACg8ocKW0-wShGLGgVBRew7-H1Ax1ER313WI3IAKtkOW-_Is-QZY_Ts=s96-c',
-//   iss: 'https://securetoken.google.com/product-validator-3e181',
-//   aud: 'product-validator-3e181',
-//   auth_time: 1776852933,
-//   user_id: 'Enz3KHi3zLN8LqKiR1kkMKGkEs12',
-//   sub: 'Enz3KHi3zLN8LqKiR1kkMKGkEs12',
-//   iat: 1776863878,
-//   exp: 1776867478,
-//   email: 'onlyonekimzy@gmail.com',
-//   email_verified: true,
-//   firebase: {
-//     identities: { 'google.com': [Array], email: [Array] },
-//     sign_in_provider: 'google.com'
-//   },
-//   uid: 'Enz3KHi3zLN8LqKiR1kkMKGkEs12'
-// }

@@ -6,11 +6,15 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+}
 model User {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firebaseUid   String         @unique @map("firebase_uid")
-  email         String         @unique
-  hasAllergies  Boolean?         
+  email         String         @unique        
   displayName   String?        @map("display_name")
   avatarUrl     String?        @map("avatar_url")
   createdAt     DateTime       @default(now()) @map("created_at")
@@ -19,10 +23,20 @@ model User {
   @@map("users")
 }
 
+enum AllergenCategory {
+  NUT
+  DAIRY
+  GLUTEN
+  SEAFOOD
+  EGG
+  SOY
+  OTHER
+}
+
 model Allergen {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String         @unique
-  category      String
+  category      AllergenCategory
   commonNames   String[]       @map("common_names")
   userAllergens UserAllergen[]
 
@@ -33,6 +47,7 @@ model UserAllergen {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String   @map("user_id") @db.Uuid
   allergenId String   @map("allergen_id") @db.Uuid
+  severity   AllergySeverity @default(MODERATE)
   allergen   Allergen @relation(fields: [allergenId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

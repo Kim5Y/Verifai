@@ -20,8 +20,9 @@ export class FirebaseAuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
     try {
       const decoded = await this.firebaseService.getAuth().verifyIdToken(token);
+      // const decoded = await this.firebaseService.verifyToken(token);
       request.user = decoded;
-      console.log(process.env.AUDIENCE);
+      // console.log(process.env.AUDIENCE);
       if (decoded.aud !== process.env.AUDIENCE) {
         throw new UnauthorizedException();
       }
