@@ -1,9 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-/**
- * Regions represent routing targets for downstream regulatory adapters.
- * Keep this enum explicit and easy to expand as new country adapters are added.
- */
 export enum Region {
   NIGERIA = 'NIGERIA',
   USA = 'USA',
@@ -12,35 +8,21 @@ export enum Region {
   EU = 'EU',
 }
 
-/**
- * NormalizedProduct is the only input accepted by this inference engine.
- * Provider-specific payloads (e.g., OpenFoodFacts raw JSON) must be normalized upstream.
- */
+
 export interface NormalizedProduct {
   barcode: string;
-
   name?: string;
   brand?: string;
-
   manufacturingCountries: string[];
-
   purchaseCountries: string[];
-
   languages: string[];
-
   labels: string[];
-
   traces: string[];
-
   ingredients: string[];
 }
 
 export type RegionConfidenceMap = Partial<Record<Region, number>>;
 
-/**
- * Centralized weights make the engine tunable without rewriting rules.
- * Values are intentionally additive; multiple weak/medium signals can accumulate.
- */
 const INFERENCE_WEIGHTS = {
   MANUFACTURING_COUNTRY: 0.6,
   PURCHASE_COUNTRY: 0.6,
@@ -90,10 +72,6 @@ const REGION_KEYWORDS = {
     en: [Region.UK, Region.USA],
   },
   labels: {
-    /**
-     * Labels are typically curated/certified (e.g., organic programs, national registries),
-     * so they are treated as very strong evidence when present.
-     */
     'eu-organic': [Region.EU],
     'en:eu-organic': [Region.EU],
     'fr-bio': [Region.FRANCE],
@@ -105,13 +83,6 @@ const REGION_KEYWORDS = {
   },
 } as const;
 
-/**
- * Barcode prefix rules are intentionally low-weight:
- * - Prefix allocation can reflect the organization issuing numbers, not the primary regulated market
- * - Products are manufactured and distributed globally
- * - Imports/exports and repackaging can blur origin signals
- * Treat barcode inference as a tie-breaker when other evidence is limited.
- */
 const BARCODE_PREFIX_TO_REGION_RULES: ReadonlyArray<{
   prefix: string;
   regions: ReadonlyArray<Region>;
@@ -135,10 +106,6 @@ const BARCODE_PREFIX_TO_REGION_RULES: ReadonlyArray<{
 export class RegionInferenceProvider {
   private readonly logger = new Logger(RegionInferenceProvider.name);
 
-  /**
-   * Deterministic, weighted, rule-based inference.
-   * Returns a partial map so callers can treat "insufficient evidence" as an expected state.
-   */
   infer(product: NormalizedProduct): RegionConfidenceMap {
     const inferenceScores: InferenceScores = {};
 
@@ -165,10 +132,6 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
     inferenceScores: InferenceScores,
   ): void {
-    /**
-     * Manufacturing location is usually a strong signal due to supply chain constraints,
-     * packaging/labeling requirements, and traceability.
-     */
     if (product.manufacturingCountries.length === 0) {
       return;
     }
@@ -194,10 +157,6 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
     inferenceScores: InferenceScores,
   ): void {
-    /**
-     * Purchase countries are a strong signal because they indicate where the product was obtained,
-     * which often correlates with the applicable regulator and market-specific labeling.
-     */
     if (product.purchaseCountries.length === 0) {
       return;
     }
@@ -221,11 +180,6 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
     inferenceScores: InferenceScores,
   ): void {
-    /**
-     * Languages are medium-strength evidence:
-     * - multiple regions share languages (e.g., English)
-     * - multilingual packaging is common for exported products
-     */
     if (product.languages.length === 0) {
       return;
     }
@@ -257,10 +211,6 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
     inferenceScores: InferenceScores,
   ): void {
-    /**
-     * Labels are very strong signals when they refer to known programs or registries,
-     * since they are generally validated and region-specific.
-     */
     if (product.labels.length === 0) {
       return;
     }
@@ -305,10 +255,7 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
     inferenceScores: InferenceScores,
   ): void {
-    /**
-     * Barcode prefix inference is intentionally weak and should only nudge confidence.
-     * It can help with ties when other evidence is sparse.
-     */
+ 
     const barcode = product.barcode.trim();
     if (!barcode) {
       return;
@@ -390,10 +337,7 @@ export class RegionInferenceProvider {
   }
 
   private normalizeScores(inferenceScores: InferenceScores): RegionConfidenceMap {
-    /**
-     * Normalization converts additive raw scores into a consistent 0–1 confidence scale.
-     * This preserves relative confidence and keeps routing comparable across products.
-     */
+
     const rawScores = Object.entries(inferenceScores).filter(
       (entry): entry is [Region, number] => typeof entry[1] === 'number' && entry[1] > 0,
     );
