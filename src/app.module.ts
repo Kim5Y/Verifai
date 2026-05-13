@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { UserModule } from './user/user.module';
 import { AllergyModule } from './allergy/allergy.module';
+import { VerifyModule } from './verify/verify.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AllergyModule } from './allergy/allergy.module';
     AuthModule,
     UserModule,
     AllergyModule,
+    VerifyModule
   ],
 })
 export class AppModule {}

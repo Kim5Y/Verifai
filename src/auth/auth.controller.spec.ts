@@ -3,12 +3,19 @@ jest.mock('./guards/firebase-guard/firebase-auth.guard', () => ({
   FirebaseAuthGuard: class FirebaseAuthGuard {},
 }));
 
-const { AuthController } = require('./auth.controller') as typeof import('./auth.controller');
+const { AuthController } =
+  require('./auth.controller') as typeof import('./auth.controller');
 
 describe('AuthController', () => {
   it('delegates createUser to AuthService.createUser', () => {
     // Arrange
-    const user = { uid: 'uid_1' };
+    const user = {
+      uid: 'uid_1',
+      email: 'test@example.com',
+      name: 'Test User',
+      picture: '',
+      aud: '',
+    };
     const authService = { createUser: jest.fn().mockReturnValue({ ok: true }) };
     const controller = new AuthController(authService as any);
 
@@ -20,4 +27,3 @@ describe('AuthController', () => {
     expect(result).toEqual({ ok: true });
   });
 });
-

@@ -18,8 +18,7 @@ async function bootstrap() {
   app.use(cookieParser());
   const PORT = process.env.PORT ?? 3000;
   await app.listen(PORT);
-  const logger = new Logger('Main');
-
+  const logger = new Logger('NestApplication');
   logger.log(`server running on PORT:${PORT}`);
 }
-bootstrap().catch((err) => console.error(err));
+bootstrap();
