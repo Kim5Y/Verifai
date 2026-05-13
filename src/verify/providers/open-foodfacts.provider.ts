@@ -68,25 +68,25 @@ export class OpenFoodFactsProvider {
   private readonly logger = new Logger(OpenFoodFactsProvider.name);
 
   constructor(
-    private readonly http: HttpService,
-    private readonly config: ConfigService,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   async lookupProduct(code: string): Promise<OpenFoodFactsLookupResult> {
     const baseUrl =
-      this.config.get<string>('OPENFOODFACTS_BASE_URL') ??
+      this.configService.get<string>('OPENFOODFACTS_BASE_URL') ??
       'https://world.openfoodfacts.org';
-    const timeoutMs = Number(
-      this.config.get<string>('OPENFOODFACTS_TIMEOUT_MS') ?? 8000,
+    const timeoutMilliseconds = Number(
+      this.configService.get<string>('OPENFOODFACTS_TIMEOUT_MS') ?? 8000,
     );
 
-    const url = `${baseUrl.replace(/\/$/, '')}/api/v2/product/${encodeURIComponent(
+    const productLookupUrl = `${baseUrl.replace(/\/$/, '')}/api/v2/product/${encodeURIComponent(
       code,
     )}.json`;
 
     const response = await firstValueFrom(
-      this.http.get<OpenFoodFactsProductResponse>(url, {
-        timeout: Number.isFinite(timeoutMs) ? timeoutMs : 8000,
+      this.httpService.get<OpenFoodFactsProductResponse>(productLookupUrl, {
+        timeout: Number.isFinite(timeoutMilliseconds) ? timeoutMilliseconds : 8000,
         validateStatus: () => true,
         headers: {
           'User-Agent': `product-validation-project/${process.env.npm_package_version ?? '0.0.1'}`,

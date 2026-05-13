@@ -6,10 +6,10 @@ import { VerifyScanDto } from './verify-dto';
 export class VerifyService {
   constructor(private readonly openFoodFacts: OpenFoodFactsProvider) {}
 
-  async verifyProduct(dto: VerifyScanDto) {
-    const OpenFoodFactsLookup = await this.openFoodFacts.lookupProduct(
-      dto.code,
+  async verifyProduct(verifyScanDto: VerifyScanDto) {
+    const openFoodFactsLookupResult = await this.openFoodFacts.lookupProduct(
+      verifyScanDto.code,
     );
-    return { ...dto, openFoodFacts: OpenFoodFactsLookup };
+    return { ...verifyScanDto, openFoodFacts: openFoodFactsLookupResult };
   }
 }

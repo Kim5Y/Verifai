@@ -4,9 +4,9 @@ import { VerifyScanDto } from './verify-dto';
 
 @Controller('verify')
 export class VerifyController {
-  constructor(private verifyservice: VerifyService) {}
+  constructor(private readonly verifyService: VerifyService) {}
   @Post('/')
-  async verifyProduct(@Body() dto: VerifyScanDto) {
-    return await this.verifyservice.verifyProduct(dto);
+  async verifyProduct(@Body() verifyScanDto: VerifyScanDto) {
+    return await this.verifyService.verifyProduct(verifyScanDto);
   }
 }
