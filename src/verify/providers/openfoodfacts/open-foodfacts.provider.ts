@@ -42,7 +42,7 @@ export interface NormalizedProduct {
   allergens: string[];
   traces: string[];
   manufacturingCountries: string[];
-  sellingCountries: string[];
+  purchaseCountries: string[];
   languages: string[];
   labels: string[];
   rawSource: 'openfoodfacts';
@@ -139,7 +139,7 @@ export class OpenFoodFactsProvider {
       allergens: asStringArray(product.allergens_tags),
       traces: asStringArray(product.traces_tags),
       manufacturingCountries: asStringArray(product.manufacturing_places_tags),
-      sellingCountries: asStringArray(product.countries_tags),
+      purchaseCountries: asStringArray(product.countries_tags),
       languages: asStringArray(product.languages_hierarchy),
       labels: asStringArray(product.labels_tags),
       rawSource: 'openfoodfacts',
