@@ -92,7 +92,7 @@ describe('OpenFoodFactsProvider', () => {
     const result = await provider.lookupProduct('123');
 
     expect(result.ingredients).toEqual(['sugar', 'salt', 'pepper']);
-    expect(result.allergens).toEqual(['en:milk']);
+    expect(result.allergens).toEqual(['milk']);
   });
 
   it('falls back to ingredients_tags when ingredients_text is empty', async () => {
@@ -118,7 +118,7 @@ describe('OpenFoodFactsProvider', () => {
     );
 
     const result = await provider.lookupProduct('123');
-    expect(result.ingredients).toEqual(['en:sugar', 'en:salt']);
+    expect(result.ingredients).toEqual(['sugar', 'salt']);
   });
 
   it('throws NotFoundException for 404 responses', async () => {
@@ -148,4 +148,3 @@ describe('OpenFoodFactsProvider', () => {
     );
   });
 });
-

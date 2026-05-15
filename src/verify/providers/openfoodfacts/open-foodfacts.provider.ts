@@ -8,6 +8,8 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { normalizeTaxonomyArray } from '../../../common/utils/taxonomy-normalizer.util';
+import { NormalizedProduct } from '../region-inference-provider/interface/normalized-product.interface';
 
 type OpenFoodFactsProductResponse = {
   status?: 0 | 1;
@@ -31,24 +33,15 @@ type OpenFoodFactsProductResponse = {
   };
 };
 
-export interface NormalizedProduct {
-  barcode: string;
-  name?: string;
-  brand?: string;
+export interface OpenFoodFactsNormalizedProduct extends NormalizedProduct {
   quantity?: string;
   imageUrl?: string;
   nutriments?: Record<string, unknown>;
-  ingredients: string[];
   allergens: string[];
-  traces: string[];
-  manufacturingCountries: string[];
-  purchaseCountries: string[];
-  languages: string[];
-  labels: string[];
   rawSource: 'openfoodfacts';
 }
 
-export type OpenFoodFactsLookupResult = NormalizedProduct;
+export type OpenFoodFactsLookupResult = OpenFoodFactsNormalizedProduct;
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -71,6 +64,28 @@ export class OpenFoodFactsProvider {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
+
+  private summarizeArray(values: string[]): { count: number; sample: string[] } {
+    const sampleLimit = 5;
+    return { count: values.length, sample: values.slice(0, sampleLimit) };
+  }
+
+  private logNormalization(
+    code: string,
+    field: string,
+    before: string[],
+    after: string[],
+  ): void {
+    this.logger.debug(
+      JSON.stringify({
+      msg: 'taxonomy_normalization',
+      code,
+      field,
+      before: this.summarizeArray(before),
+      after: this.summarizeArray(after),
+      }),
+    );
+  }
 
   async lookupProduct(code: string): Promise<OpenFoodFactsLookupResult> {
     const baseUrl =
@@ -127,6 +142,42 @@ export class OpenFoodFactsProvider {
     const ingredientsFromText = splitIngredientsText(product.ingredients_text);
     const ingredientsFromTags = asStringArray(product.ingredients_tags);
 
+    const rawAllergens = asStringArray(product.allergens_tags);
+    const rawTraces = asStringArray(product.traces_tags);
+    const rawManufacturingCountries = asStringArray(product.manufacturing_places_tags);
+    const rawPurchaseCountries = asStringArray(product.countries_tags);
+    const rawLanguages = asStringArray(product.languages_hierarchy);
+    const rawLabels = asStringArray(product.labels_tags);
+    const rawIngredients =
+      ingredientsFromText.length > 0 ? ingredientsFromText : ingredientsFromTags;
+
+    const allergens = normalizeTaxonomyArray(rawAllergens);
+    const traces = normalizeTaxonomyArray(rawTraces);
+    const manufacturingCountries = normalizeTaxonomyArray(rawManufacturingCountries);
+    const purchaseCountries = normalizeTaxonomyArray(rawPurchaseCountries);
+    const languages = normalizeTaxonomyArray(rawLanguages);
+    const labels = normalizeTaxonomyArray(rawLabels);
+
+    const ingredients =
+      ingredientsFromText.length > 0
+        ? rawIngredients
+        : normalizeTaxonomyArray(rawIngredients);
+
+    this.logNormalization(code, 'allergens', rawAllergens, allergens);
+    this.logNormalization(code, 'traces', rawTraces, traces);
+    this.logNormalization(
+      code,
+      'manufacturingCountries',
+      rawManufacturingCountries,
+      manufacturingCountries,
+    );
+    this.logNormalization(code, 'purchaseCountries', rawPurchaseCountries, purchaseCountries);
+    this.logNormalization(code, 'languages', rawLanguages, languages);
+    this.logNormalization(code, 'labels', rawLabels, labels);
+    if (ingredientsFromText.length === 0) {
+      this.logNormalization(code, 'ingredients', rawIngredients, ingredients);
+    }
+
     return {
       barcode: code,
       name: product.product_name,
@@ -134,14 +185,13 @@ export class OpenFoodFactsProvider {
       quantity: product.quantity,
       imageUrl: product.image_front_url ?? product.image_url,
       nutriments: product.nutriments,
-      ingredients:
-        ingredientsFromText.length > 0 ? ingredientsFromText : ingredientsFromTags,
-      allergens: asStringArray(product.allergens_tags),
-      traces: asStringArray(product.traces_tags),
-      manufacturingCountries: asStringArray(product.manufacturing_places_tags),
-      purchaseCountries: asStringArray(product.countries_tags),
-      languages: asStringArray(product.languages_hierarchy),
-      labels: asStringArray(product.labels_tags),
+      ingredients,
+      allergens,
+      traces,
+      manufacturingCountries,
+      purchaseCountries,
+      languages,
+      labels,
       rawSource: 'openfoodfacts',
     };
   }
