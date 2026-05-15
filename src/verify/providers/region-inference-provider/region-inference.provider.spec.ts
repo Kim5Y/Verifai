@@ -13,8 +13,8 @@ describe('RegionInferenceProvider', () => {
       barcode: '123',
       name: 'Test Product',
       brand: 'Test Brand',
-      manufacturingCountries: [' Nigeria '],
-      purchaseCountries: ['USA'],
+      manufacturingCountries: ['nigeria'],
+      purchaseCountries: ['usa'],
       languages: [],
       labels: [],
       traces: [],
@@ -31,12 +31,12 @@ describe('RegionInferenceProvider', () => {
         expect.objectContaining({
           region: Region.NIGERIA,
           source: 'manufacturing_country',
-          matchedValue: ' Nigeria ',
+          matchedValue: 'nigeria',
         }),
         expect.objectContaining({
           region: Region.USA,
           source: 'purchase_country',
-          matchedValue: 'USA',
+          matchedValue: 'usa',
         }),
       ]),
     );
@@ -45,7 +45,7 @@ describe('RegionInferenceProvider', () => {
   it('returns empty confidence when no signals match', () => {
     const result = provider.infer({
       barcode: '123',
-      manufacturingCountries: ['NowhereLand'],
+      manufacturingCountries: ['nowhereland'],
       purchaseCountries: [],
       languages: [],
       labels: [],
@@ -57,4 +57,3 @@ describe('RegionInferenceProvider', () => {
     expect(result.evidence).toEqual([]);
   });
 });
-

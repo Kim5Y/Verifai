@@ -48,12 +48,12 @@ describe('VerifyService', () => {
         imageUrl: 'https://example.com/image.jpg',
         nutriments: { salt: 1 },
         ingredients: ['sugar'],
-        allergens: ['en:milk'],
-        traces: ['en:nuts'],
-        manufacturingCountries: ['Nigeria'],
-        purchaseCountries: ['USA'],
-        languages: ['en:english'],
-        labels: ['en:made-in-nigeria'],
+        allergens: ['milk'],
+        traces: ['nuts'],
+        manufacturingCountries: ['nigeria'],
+        purchaseCountries: ['usa'],
+        languages: ['english'],
+        labels: ['made-in-nigeria'],
         rawSource: 'openfoodfacts',
       });
 
@@ -75,11 +75,11 @@ describe('VerifyService', () => {
       const inferenceInput = regionInferenceProvider.infer.mock.calls[0]?.[0];
       expect(inferenceInput).toMatchObject({
         barcode: '12345678',
-        manufacturingCountries: ['Nigeria'],
-        purchaseCountries: ['USA'],
-        languages: ['en:english'],
-        labels: ['en:made-in-nigeria'],
-        traces: ['en:nuts'],
+        manufacturingCountries: ['nigeria'],
+        purchaseCountries: ['usa'],
+        languages: ['english'],
+        labels: ['made-in-nigeria'],
+        traces: ['nuts'],
         ingredients: ['sugar'],
       });
       expect(inferenceInput).not.toHaveProperty('quantity');

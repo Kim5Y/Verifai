@@ -1,15 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { COUNTRY_RULES } from './rules';
-// import { BARCODE_PREFIX_TO_REGION_RULES } from './rules';
 import { Region } from './region.enums';
 import { InferenceEvidence, InferenceResult, NormalizedProduct } from './interface';
 import { INFERENCE_WEIGHTS, MINIMUM_CONFIDENCE_THRESHOLD } from './region.constants';
 import {
-  // InferenceScores,
   RegionConfidenceMap,
-  // EvidenceMatch,
 } from './region.types';
-
 
 @Injectable()
 export class RegionInferenceProvider {
@@ -21,7 +17,6 @@ export class RegionInferenceProvider {
     product: NormalizedProduct,
   ): InferenceResult {
     const scores: RegionConfidenceMap = {};
-
     const evidence: InferenceEvidence[] = [];
 
     this.inferManufacturing(
@@ -51,14 +46,11 @@ export class RegionInferenceProvider {
     evidence: InferenceEvidence[],
   ): void {
     for (const country of product.manufacturingCountries) {
-      const normalized =
-        this.normalize(country);
-
       for (const [region, keywords] of Object.entries(
         COUNTRY_RULES,
       )) {
         if (
-          keywords.includes(normalized)
+          keywords.includes(country)
         ) {
           this.addScore(
             scores,
@@ -85,14 +77,11 @@ export class RegionInferenceProvider {
     evidence: InferenceEvidence[],
   ): void {
     for (const country of product.purchaseCountries) {
-      const normalized =
-        this.normalize(country);
-
       for (const [region, keywords] of Object.entries(
         COUNTRY_RULES,
       )) {
         if (
-          keywords.includes(normalized)
+          keywords.includes(country)
         ) {
           this.addScore(
             scores,
@@ -152,13 +141,5 @@ export class RegionInferenceProvider {
     }
 
     return normalized;
-  }
-
-  private normalize(
-    value: string,
-  ): string {
-    return value
-      .trim()
-      .toLowerCase();
   }
 }
