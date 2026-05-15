@@ -3,11 +3,12 @@ import { VerifyController } from './verify.controller';
 import { VerifyService } from './verify.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { OpenFoodFactsProvider } from './providers/open-foodfacts.provider';
+import { OpenFoodFactsProvider } from './providers/openfoodfacts/open-foodfacts.provider';
+import { RegionInferenceProvider } from './providers/region-inference-provider/region-inference.provider';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }), HttpModule],
   controllers: [VerifyController],
-  providers: [VerifyService, OpenFoodFactsProvider],
+  providers: [VerifyService, OpenFoodFactsProvider, RegionInferenceProvider],
 })
 export class VerifyModule {}

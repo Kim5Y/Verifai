@@ -3,7 +3,7 @@ import { VerifyService } from './verify.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { of } from 'rxjs';
-import { OpenFoodFactsProvider } from './providers/open-foodfacts.provider';
+import { OpenFoodFactsProvider } from './providers/openfoodfacts/open-foodfacts.provider';
 
 describe('VerifyService', () => {
   let service: VerifyService;
