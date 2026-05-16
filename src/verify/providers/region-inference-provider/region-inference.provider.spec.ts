@@ -10,11 +10,11 @@ describe('RegionInferenceProvider', () => {
 
   it('infers regions from manufacturing and purchase countries with evidence', () => {
     const result = provider.infer({
-      barcode: '123',
+      barcode: '9900000000000',
       name: 'Test Product',
       brand: 'Test Brand',
-      manufacturingCountries: ['nigeria'],
-      purchaseCountries: ['usa'],
+      manufacturingCountries: [' Nigeria '],
+      purchaseCountries: ['USA'],
       languages: [],
       labels: [],
       traces: [],
@@ -31,12 +31,12 @@ describe('RegionInferenceProvider', () => {
         expect.objectContaining({
           region: Region.NIGERIA,
           source: 'manufacturing_country',
-          matchedValue: 'nigeria',
+          matchedValue: ' Nigeria ',
         }),
         expect.objectContaining({
           region: Region.USA,
           source: 'purchase_country',
-          matchedValue: 'usa',
+          matchedValue: 'USA',
         }),
       ]),
     );
@@ -44,7 +44,7 @@ describe('RegionInferenceProvider', () => {
 
   it('returns empty confidence when no signals match', () => {
     const result = provider.infer({
-      barcode: '123',
+      barcode: '9900000000000',
       manufacturingCountries: ['nowhereland'],
       purchaseCountries: [],
       languages: [],
@@ -55,5 +55,38 @@ describe('RegionInferenceProvider', () => {
 
     expect(result.confidence).toEqual({});
     expect(result.evidence).toEqual([]);
+  });
+
+  it('infers from labels, languages, and barcode prefixes', () => {
+    const result = provider.infer({
+      barcode: '5010477348630',
+      manufacturingCountries: [],
+      purchaseCountries: [],
+      languages: ['en:english'],
+      labels: ['en:gb-org-05'],
+      traces: [],
+      ingredients: [],
+    });
+
+    expect(result.confidence).toEqual(
+      expect.objectContaining({
+        [Region.UK]: expect.any(Number),
+      }),
+    );
+
+    expect(result.evidence).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          region: Region.UK,
+          source: 'label',
+          matchedValue: 'en:gb-org-05',
+        }),
+        expect.objectContaining({
+          region: Region.UK,
+          source: 'barcode',
+          matchedValue: '50',
+        }),
+      ]),
+    );
   });
 });

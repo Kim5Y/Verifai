@@ -15,9 +15,10 @@ export class VerifyService {
     const openFoodFactsLookupResult = await this.openFoodFacts.lookupProduct(
       verifyScanDto.code,
     );
+
+    this.logger.log(openFoodFactsLookupResult);
     const { quantity, imageUrl, allergens, rawSource, ...rest } =
       openFoodFactsLookupResult;
-
     const getCauntryScore = this.regionInferenceProvider.infer(rest);
     return { ...verifyScanDto, getCauntryScore };
   }

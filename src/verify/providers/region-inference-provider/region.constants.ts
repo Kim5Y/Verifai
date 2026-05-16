@@ -6,4 +6,4 @@ export const INFERENCE_WEIGHTS = {
   BARCODE_PREFIX: 0.05,
 } as const;
 
-export const MINIMUM_CONFIDENCE_THRESHOLD = 0.15;
+export const MINIMUM_CONFIDENCE_THRESHOLD = 0.2;
