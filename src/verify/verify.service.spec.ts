@@ -2,11 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { VerifyService } from './verify.service';
 import { OpenFoodFactsProvider } from './providers/openfoodfacts/open-foodfacts.provider';
 import { RegionInferenceProvider } from './providers/region-inference-provider/region-inference.provider';
+import { VerificationRouterService } from '../verification/router/verification-router.service';
 
 describe('VerifyService', () => {
   let service: VerifyService;
   let openFoodFacts: { lookupProduct: jest.Mock };
   let regionInferenceProvider: { infer: jest.Mock };
+  let verificationRouterService: { verifyProduct: jest.Mock };
 
   beforeEach(async () => {
     openFoodFacts = {
@@ -15,6 +17,10 @@ describe('VerifyService', () => {
 
     regionInferenceProvider = {
       infer: jest.fn(),
+    };
+
+    verificationRouterService = {
+      verifyProduct: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +33,10 @@ describe('VerifyService', () => {
         {
           provide: RegionInferenceProvider,
           useValue: regionInferenceProvider,
+        },
+        {
+          provide: VerificationRouterService,
+          useValue: verificationRouterService,
         },
       ],
     }).compile();
@@ -62,15 +72,22 @@ describe('VerifyService', () => {
         evidence: [],
       });
 
-      const dto = {
+      verificationRouterService.verifyProduct.mockResolvedValue({
+        verified: false,
+        status: 'UNSUPPORTED',
+        verifiedAt: '2026-05-15T12:34:56.000Z',
+      });
+
+      const verifyScanDto = {
         code: '12345678',
         scannedAt: '2026-05-15T12:34:56.000Z',
       };
 
-      const result = await service.verifyProduct(dto as any);
+      const result = await service.verifyProduct(verifyScanDto as any);
 
       expect(openFoodFacts.lookupProduct).toHaveBeenCalledWith('12345678');
       expect(regionInferenceProvider.infer).toHaveBeenCalledTimes(1);
+      expect(verificationRouterService.verifyProduct).toHaveBeenCalledTimes(1);
 
       const inferenceInput = regionInferenceProvider.infer.mock.calls[0]?.[0];
       expect(inferenceInput).toMatchObject({
@@ -88,10 +105,15 @@ describe('VerifyService', () => {
       expect(inferenceInput).not.toHaveProperty('rawSource');
 
       expect(result).toEqual({
-        ...dto,
-        getCauntryScore: {
+        ...verifyScanDto,
+        regionInference: {
           confidence: { NIGERIA: 1 },
           evidence: [],
+        },
+        regulatoryVerification: {
+          verified: false,
+          status: 'UNSUPPORTED',
+          verifiedAt: '2026-05-15T12:34:56.000Z',
         },
       });
     });
